@@ -1,0 +1,12 @@
+.editorGrid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(240px, 300px);
+}
+
+@media (max-width: 980px) {
+  .editorGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

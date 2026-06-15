@@ -1,0 +1,114 @@
+.panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 22px;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-panel);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header p {
+  margin: 0 0 4px;
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.header button,
+.row button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.header button:hover,
+.row button:hover {
+  border-color: var(--color-accent);
+}
+
+.row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.layer,
+.activeLayer {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--color-surface);
+}
+
+.activeLayer {
+  border-color: var(--color-accent);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.layerTitle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.layerTitle span {
+  font-weight: 800;
+}
+
+.layerTitle small {
+  color: var(--color-muted);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.deleteButton {
+  color: var(--color-danger) !important;
+}
+
+.opacityControl {
+  display: grid;
+  gap: 6px;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.opacityControl input {
+  accent-color: var(--color-accent);
+}
+

@@ -1,0 +1,23 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.toggle:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.toggle span {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+

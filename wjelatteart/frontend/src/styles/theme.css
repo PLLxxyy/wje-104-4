@@ -1,0 +1,41 @@
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-page: oklch(0.94 0.034 73);
+  --color-surface: oklch(0.985 0.018 79);
+  --color-surface-alt: oklch(0.955 0.025 78);
+  --color-panel: oklch(0.975 0.021 84);
+  --color-canvas-bg: oklch(0.91 0.036 79);
+  --color-grid: color-mix(in oklch, oklch(0.57 0.06 74), transparent 80%);
+  --color-text: oklch(0.22 0.035 49);
+  --color-muted: oklch(0.44 0.036 57);
+  --color-border: oklch(0.78 0.04 72);
+  --color-primary: oklch(0.39 0.078 45);
+  --color-accent: oklch(0.54 0.09 158);
+  --color-danger: oklch(0.52 0.18 27);
+  --color-button-text: oklch(0.98 0.012 84);
+  --color-overlay: oklch(0.2 0.03 45);
+  --shadow-soft: 0 14px 28px color-mix(in oklch, var(--color-overlay), transparent 88%);
+  --shadow-strong: 0 22px 54px color-mix(in oklch, var(--color-overlay), transparent 78%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-page: oklch(0.19 0.03 45);
+  --color-surface: oklch(0.25 0.035 48);
+  --color-surface-alt: oklch(0.3 0.04 51);
+  --color-panel: oklch(0.23 0.033 50);
+  --color-canvas-bg: oklch(0.17 0.028 48);
+  --color-grid: color-mix(in oklch, oklch(0.62 0.055 160), transparent 86%);
+  --color-text: oklch(0.91 0.026 78);
+  --color-muted: oklch(0.76 0.025 76);
+  --color-border: oklch(0.42 0.042 54);
+  --color-primary: oklch(0.6 0.1 159);
+  --color-accent: oklch(0.69 0.12 186);
+  --color-danger: oklch(0.66 0.18 31);
+  --color-button-text: oklch(0.17 0.026 45);
+  --color-overlay: oklch(0.08 0.025 44);
+  --shadow-soft: 0 14px 28px color-mix(in oklch, black, transparent 72%);
+  --shadow-strong: 0 22px 54px color-mix(in oklch, black, transparent 54%);
+}
+
