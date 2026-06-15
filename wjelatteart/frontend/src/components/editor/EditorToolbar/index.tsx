@@ -1,7 +1,9 @@
 import {
   ArrowLeft,
   Download,
+  Edit3,
   FolderOpen,
+  Play,
   Redo2,
   Save,
   Sparkles,
@@ -14,6 +16,8 @@ interface EditorToolbarProps {
   artworkName: string;
   canUndo: boolean;
   canRedo: boolean;
+  isPlaybackMode: boolean;
+  strokeCount: number;
   onNameChange: (name: string) => void;
   onHome: () => void;
   onUndo: () => void;
@@ -22,12 +26,15 @@ interface EditorToolbarProps {
   onSave: () => void;
   onOpenExport: () => void;
   onOpenGallery: () => void;
+  onTogglePlayback: () => void;
 }
 
 export const EditorToolbar = ({
   artworkName,
   canUndo,
   canRedo,
+  isPlaybackMode,
+  strokeCount,
   onNameChange,
   onHome,
   onUndo,
@@ -35,7 +42,8 @@ export const EditorToolbar = ({
   onOpenPresets,
   onSave,
   onOpenExport,
-  onOpenGallery
+  onOpenGallery,
+  onTogglePlayback
 }: EditorToolbarProps): JSX.Element => (
   <header className={styles.toolbar}>
     <button type="button" onClick={onHome} title="返回首页">
@@ -71,6 +79,25 @@ export const EditorToolbar = ({
     <button type="button" onClick={onOpenGallery} title="打开作品集">
       <FolderOpen size={18} aria-hidden="true" />
       作品集
+    </button>
+    <button
+      type="button"
+      onClick={onTogglePlayback}
+      title={isPlaybackMode ? "返回编辑模式" : "进入回放模式"}
+      disabled={!isPlaybackMode && strokeCount === 0}
+      className={isPlaybackMode ? styles.activeButton : undefined}
+    >
+      {isPlaybackMode ? (
+        <>
+          <Edit3 size={18} aria-hidden="true" />
+          编辑
+        </>
+      ) : (
+        <>
+          <Play size={18} aria-hidden="true" />
+          回放
+        </>
+      )}
     </button>
     <ThemeToggle />
   </header>

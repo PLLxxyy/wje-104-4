@@ -43,3 +43,9 @@
   font-weight: 800;
 }
 
+.activeButton {
+  background: var(--color-accent) !important;
+  color: white !important;
+  border-color: var(--color-accent) !important;
+}
+

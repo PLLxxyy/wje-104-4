@@ -1,17 +1,20 @@
 import dayjs from "dayjs";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { CanvasWorkspaceHandle } from "../../components/editor/CanvasWorkspace";
 import { DEFAULT_EXPORT_SCALE, EditorOverlays } from "../../components/editor/EditorOverlays";
 import { EditorToolbar } from "../../components/editor/EditorToolbar";
 import { EditorWorkArea } from "../../components/editor/EditorWorkArea";
+import { PlaybackCanvas } from "../../components/editor/PlaybackCanvas";
+import { PlaybackControls } from "../../components/editor/PlaybackControls";
 import { StatusBar } from "../../components/editor/StatusBar";
 import { ToolPanelValue } from "../../components/editor/ToolPanel";
-import { ROUTES, UI_TEXT } from "../../constants/app";
+import { CANVAS_SIZE, ROUTES, UI_TEXT } from "../../constants/app";
 import { createDefaultLayers } from "../../constants/presets";
 import { useHistory } from "../../hooks/useHistory";
 import { useLayerHistoryControls } from "../../hooks/useLayerHistoryControls";
+import { usePlayback } from "../../hooks/usePlayback";
 import { useArtworkStore } from "../../stores/useArtworkStore";
 import { useLayerStore } from "../../stores/useLayerStore";
 import { useThemeStore } from "../../stores/useThemeStore";
@@ -45,6 +48,7 @@ export const Editor = (): JSX.Element => {
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [selectedScale, setSelectedScale] = useState<ExportScale>(DEFAULT_EXPORT_SCALE);
+  const [isPlaybackMode, setIsPlaybackMode] = useState(false);
   const { theme } = useThemeStore();
   const toolStore = useToolStore();
   const layers = useLayerStore((state) => state.layers);
@@ -68,6 +72,42 @@ export const Editor = (): JSX.Element => {
   } = useHistory<Layer[]>(cloneLayers(createDefaultLayers()));
   const { undoLayers, redoLayers } = useLayerHistoryControls({ undo, redo, setLayers });
 
+  const playback = usePlayback(layers);
+
+  const showNotice = useCallback((message: string): void => {
+    setNotice(message);
+    window.setTimeout(() => setNotice(""), 2600);
+  }, []);
+
+  const totalStrokeCount = useMemo(
+    () => layers.reduce((count, layer) => count + layer.strokes.length, 0),
+    [layers]
+  );
+
+  const playbackLayers = useMemo(
+    () => (isPlaybackMode ? playback.getPlaybackLayers() : layers),
+    [isPlaybackMode, playback, playback.currentTime]
+  );
+
+  const handleTogglePlaybackMode = useCallback((): void => {
+    if (!isPlaybackMode && totalStrokeCount === 0) {
+      showNotice("当前画布没有可回放的笔画");
+      return;
+    }
+    if (isPlaybackMode) {
+      playback.stop();
+    }
+    setIsPlaybackMode((prev) => !prev);
+  }, [isPlaybackMode, totalStrokeCount, playback, showNotice]);
+
+  const handlePrevStroke = useCallback((): void => {
+    playback.seekToStroke(playback.currentStrokeIndex - 1);
+  }, [playback]);
+
+  const handleNextStroke = useCallback((): void => {
+    playback.seekToStroke(playback.currentStrokeIndex + 1);
+  }, [playback]);
+
   const syncLayers = useCallback(
     (nextLayers: Layer[], recordHistory: boolean): void => {
       setLayers(nextLayers);
@@ -86,11 +126,6 @@ export const Editor = (): JSX.Element => {
     setLayers(nextLayers);
     clear(cloneLayers(nextLayers));
   }, [artworkId, clear, getArtworkById, setLayers]);
-
-  const showNotice = useCallback((message: string): void => {
-    setNotice(message);
-    window.setTimeout(() => setNotice(""), 2600);
-  }, []);
 
   const handleToolChange = (value: Partial<ToolPanelValue>): void => {
     if (value.toolType) {
@@ -227,6 +262,8 @@ export const Editor = (): JSX.Element => {
         artworkName={artworkName}
         canUndo={canUndo}
         canRedo={canRedo}
+        isPlaybackMode={isPlaybackMode}
+        strokeCount={totalStrokeCount}
         onNameChange={setArtworkName}
         onHome={() => navigate(ROUTES.home)}
         onUndo={undoLayers}
@@ -235,40 +272,68 @@ export const Editor = (): JSX.Element => {
         onSave={handleSave}
         onOpenExport={() => setExportOpen(true)}
         onOpenGallery={() => navigate(ROUTES.gallery)}
+        onTogglePlayback={handleTogglePlaybackMode}
       />
 
-      <EditorWorkArea
-        canvasRef={canvasRef}
-        tool={{
-          toolType: toolStore.toolType,
-          color: toolStore.color,
-          brushSize: toolStore.brushSize,
-          opacity: toolStore.opacity,
-          flowSpeed: toolStore.flowSpeed
-        }}
-        layers={layers}
-        activeLayerId={activeLayerId}
-        theme={theme}
-        onToolChange={handleToolChange}
-        onStrokeComplete={handleStrokeComplete}
-        onPointerPosition={setPointer}
-        onCanvasError={showNotice}
-        onSelectLayer={selectLayer}
-        onToggleLayerVisibility={(layerId) => commitStoreAction(() => toggleLayerVisibility(layerId))}
-        onAddLayer={() => commitStoreAction(() => addLayer())}
-        onDeleteLayer={handleDeleteLayerRequest}
-        onReorderLayer={(layerId, direction) => commitStoreAction(() => moveLayer(layerId, direction))}
-        onLayerOpacityChange={(layerId, opacity) =>
-          commitStoreAction(() => setLayerOpacity(layerId, opacity))
-        }
-      />
+      {isPlaybackMode ? (
+        <div className={styles.playbackArea}>
+          <PlaybackCanvas
+            width={CANVAS_SIZE.width}
+            height={CANVAS_SIZE.height}
+            layers={playbackLayers}
+            theme={theme}
+          />
+          <PlaybackControls
+            isPlaying={playback.isPlaying}
+            currentTime={playback.currentTime}
+            totalDuration={playback.totalDuration}
+            speed={playback.speed}
+            totalStrokes={playback.totalStrokes}
+            currentStrokeIndex={playback.currentStrokeIndex}
+            onToggle={playback.toggle}
+            onStop={playback.stop}
+            onSeek={playback.seekToTime}
+            onPrevStroke={handlePrevStroke}
+            onNextStroke={handleNextStroke}
+            onSpeedChange={playback.setSpeed}
+          />
+        </div>
+      ) : (
+        <EditorWorkArea
+          canvasRef={canvasRef}
+          tool={{
+            toolType: toolStore.toolType,
+            color: toolStore.color,
+            brushSize: toolStore.brushSize,
+            opacity: toolStore.opacity,
+            flowSpeed: toolStore.flowSpeed
+          }}
+          layers={layers}
+          activeLayerId={activeLayerId}
+          theme={theme}
+          onToolChange={handleToolChange}
+          onStrokeComplete={handleStrokeComplete}
+          onPointerPosition={setPointer}
+          onCanvasError={showNotice}
+          onSelectLayer={selectLayer}
+          onToggleLayerVisibility={(layerId) => commitStoreAction(() => toggleLayerVisibility(layerId))}
+          onAddLayer={() => commitStoreAction(() => addLayer())}
+          onDeleteLayer={handleDeleteLayerRequest}
+          onReorderLayer={(layerId, direction) => commitStoreAction(() => moveLayer(layerId, direction))}
+          onLayerOpacityChange={(layerId, opacity) =>
+            commitStoreAction(() => setLayerOpacity(layerId, opacity))
+          }
+        />
+      )}
 
-      <StatusBar
-        toolType={toolStore.toolType}
-        brushSize={toolStore.brushSize}
-        opacity={toolStore.opacity}
-        pointer={pointer}
-      />
+      {!isPlaybackMode && (
+        <StatusBar
+          toolType={toolStore.toolType}
+          brushSize={toolStore.brushSize}
+          opacity={toolStore.opacity}
+          pointer={pointer}
+        />
+      )}
 
       <EditorOverlays
         notice={notice}

@@ -5,3 +5,22 @@
   background: var(--color-page);
   color: var(--color-text);
 }
+
+.playbackArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  gap: 0;
+  overflow: auto;
+}
+
+.playbackArea > *:first-child {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+}
